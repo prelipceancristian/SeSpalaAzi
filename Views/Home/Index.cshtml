@@ -1,0 +1,9 @@
+﻿@model HolidayStatusModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p> Can I wash today? @(Model.CanWash ? "yes" : "no")</p>
+</div>
