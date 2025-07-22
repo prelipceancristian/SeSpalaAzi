@@ -1,3 +1,4 @@
+using SeSpalaAzi3.Services;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ var redisConnection = $"{redisHost}:{redisPort}";
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(redisConnection)
 );
+builder.Services.AddScoped<IScrapingService, ScrapingService>();
 
 var app = builder.Build();
 

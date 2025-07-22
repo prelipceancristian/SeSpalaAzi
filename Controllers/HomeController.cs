@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using SeSpalaAzi3.Models;
+using SeSpalaAzi3.Services;
 using StackExchange.Redis;
 
 namespace SeSpalaAzi3.Controllers;
@@ -9,30 +11,30 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private IDatabase _cache;
+    private readonly IScrapingService _scrapingService;
 
-    public HomeController(ILogger<HomeController> logger, IConnectionMultiplexer cache)
+    public HomeController(ILogger<HomeController> logger, IConnectionMultiplexer cache, IScrapingService scrapingService)
     {
         _logger = logger;
         _cache = cache.GetDatabase();
+        _scrapingService = scrapingService;
     }
 
-    public IActionResult Index()
+    public IActionResult Index([FromQuery] DateTime? date)
     {
-        var holidayStatusModel = new HolidayStatusModel([new Holiday("asd", DateTimeOffset.Now, HolidayLevel.Normal)]);
-        var isInCache = _cache.StringGet("key");
-        if (isInCache.HasValue)
+        var key = (date ?? DateTime.Now).ToString("dd-MM-yyyy");
+
+        var cacheContent = _cache.StringGet(key);
+        if (cacheContent.HasValue)
         {
-            _cache.KeyDelete("key");
-
-            return View(holidayStatusModel);
+            var cachedModel = JsonSerializer.Deserialize<HolidayStatusModel>(cacheContent.ToString());
+            return View(cachedModel);
         }
-        _cache.StringSet("key", "value");
 
-        return View(new HolidayStatusModel([]));
-        // check cache
-        // if found, return
-        // request using web crawler
-        // update cache
+        var holidayStatusModel = _scrapingService.GetHolidayStatus(DateTime.Now);
+        _cache.StringSet(key, JsonSerializer.Serialize(holidayStatusModel));
+
+        return View(holidayStatusModel);
     }
 
     public IActionResult Privacy()
