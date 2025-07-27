@@ -22,7 +22,8 @@ public class HomeController : Controller
 
     public IActionResult Index([FromQuery] DateTime? date)
     {
-        var key = (date ?? DateTime.Now).ToString("dd-MM-yyyy");
+        var searchedDate = date ?? DateTime.Now;
+        var key = searchedDate.ToString("dd-MM-yyyy");
 
         var cacheContent = _cache.StringGet(key);
         if (cacheContent.HasValue)
@@ -31,7 +32,7 @@ public class HomeController : Controller
             return View(cachedModel);
         }
 
-        var holidayStatusModel = _scrapingService.GetHolidayStatus(DateTime.Now);
+        var holidayStatusModel = _scrapingService.GetHolidayStatus(searchedDate);
         _cache.StringSet(key, JsonSerializer.Serialize(holidayStatusModel));
 
         return View(holidayStatusModel);

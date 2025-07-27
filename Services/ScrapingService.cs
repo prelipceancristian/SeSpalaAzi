@@ -5,7 +5,6 @@ namespace SeSpalaAzi3.Services
 {
     public class ScrapingService : IScrapingService
     {
-        // don't ban me lol
         private const string rootUrl = @"https://doxologia.ro/calendar-ortodox";
 
         public HolidayStatusModel GetHolidayStatus(DateTime date)
@@ -21,14 +20,22 @@ namespace SeSpalaAzi3.Services
             var monthNode = doc.DocumentNode.SelectNodes("//*[contains(@class, 'month-view')]")[0];
             // there is a wrapper div for each day 
             var dayNodes = monthNode.ChildNodes.Where(n => n.Name == "div").ToArray();
-            // I am selecting the given day
-            var specificDayNode = dayNodes[date.Day];
-            // Selecting the wrapper that contains the list of holidays for that day
-            //TODO: here something goes wrong
-            var dayHolidayContainer = specificDayNode.ChildNodes[1].SelectNodes("//*[contains(@class, 'calendar-zi')]")[0];
+            // selecting based on th given day
+            var specificDayNode = dayNodes[date.Day - 1];
+            // The day node is something like this:
+            // <div>
+            //     Actual date
+            // </div>
+            // <div>
+            //     <div class="calendar-zi rosu">
+            //         <a href="/..." class="rosub">...</a> 
+            //         <a href="/...">...</a>  
+            //     </div>
+            // </div>
+            var holidayContainer = specificDayNode.ChildNodes[1].ChildNodes[0];
 
             var result = new HolidayStatusModel();
-            if (dayHolidayContainer.Attributes["class"]?.Value.Split().Contains("rosu") == true)
+            if (holidayContainer.Attributes["class"]?.Value.Split().Contains("rosu") == true)
             {
                 //TODO: parse the actual lines for the holidays
                 var holiday = new Holiday
