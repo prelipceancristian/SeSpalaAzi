@@ -37,14 +37,18 @@ namespace SeSpalaAzi3.Services
             var result = new HolidayStatusModel();
             if (holidayContainer.Attributes["class"]?.Value.Split().Contains("rosu") == true)
             {
-                //TODO: parse the actual lines for the holidays
-                var holiday = new Holiday
+                var holidays = new List<Holiday>();
+                foreach (var node in holidayContainer.ChildNodes)
                 {
-                    Name = "testHoliday",
-                    Date = DateTime.Now,
-                    HolidayLevel = HolidayLevel.Holy
-                };
-                result.Holidays = [holiday];
+                    var holiday = new Holiday
+                    {
+                        Name = node.InnerText,
+                        Date = date,
+                        HolidayLevel = HolidayLevel.Holy
+                    };
+                    holidays.Add(holiday);
+                }
+                result.Holidays = [.. holidays];
             }
 
             return result;

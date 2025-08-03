@@ -1,9 +1,76 @@
 ﻿@model HolidayStatusModel
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Se Spala Azi?";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p> Can I wash today? @(Model.CanWash ? "yes" : "no")</p>
+<div class="container d-flex flex-column align-items-center py-5" style="max-width: 600px;">
+    <div class="text-center mb-4">
+        <div class="d-flex align-items-center justify-content-center">
+            <img src="~/images/laundry-basket.png" alt="Laundry Basket" width="80" class="me-3" />
+            <h1 class="fw-bold mt-3 mb-0">Se spala azi?</h1>
+        </div>
+    </div>
+
+    <div class="card shadow-sm w-100 mb-4">
+        <div class="card-body text-center">
+            @if (Model.CanWash)
+            {
+                <div class="alert alert-success fs-4 fw-bold">
+                    <i class="bi bi-check-circle-fill"></i> Astazi poti spala 🙆
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger fs-4 fw-bold">
+                    <i class="bi bi-x-circle-fill"></i> Astazi nu se spala 🙅
+                </div>
+            }
+            <p class="text-muted mt-3 mb-0">
+                Astazi este <strong>@DateTime.Now.ToString("MMMM dd")</strong>
+            </p>
+        </div>
+    </div>
+
+    @if (!Model.CanWash)
+    {
+        <div class="card shadow-sm w-100 mb-4">
+            <div class="card-body">
+                <h5 class="fw-bold mb-2">Sarbatori religioase astazi:</h5>
+                <ul>
+                    @foreach(var holiday in Model.Holidays) {
+                        <li><strong>@holiday.Name</strong></li>
+                }
+                </ul>
+                <p class="text-muted small">
+                    Conform traditiei ortodoxe, in aceasta zi nu se spala hainele.
+                </p>
+            </div>
+        </div>
+    }
+
+    <!-- Upcoming Section -->
+    @* <div class="card shadow-sm w-100">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Coming Up:</h5>
+            <ul class="list-unstyled mb-0">
+                @foreach (var day in upcoming)
+                {
+                    <li>
+                        <strong>@day.Date.ToString("MMMM dd")</strong> – 
+                        @if (day.CanWash)
+                        {
+                            <span class="text-success fw-bold">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger fw-bold">No</span>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div> *@
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
