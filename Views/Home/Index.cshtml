@@ -1,49 +1,70 @@
 ﻿@model HolidayStatusModel
 @{
-    ViewData["Title"] = "Se Spala Azi?";
+    ViewData["Title"] = "Se Spală Azi?";
 }
 
-<div class="container d-flex flex-column align-items-center py-5" style="max-width: 600px;">
+<div class="container d-flex flex-column align-items-center py-3" style="max-width: 800px;">
     <div class="text-center mb-4">
         <div class="d-flex align-items-center justify-content-center">
             <img src="~/images/laundry-basket.png" alt="Laundry Basket" width="80" class="me-3" />
-            <h1 class="fw-bold mt-3 mb-0">Se spala azi?</h1>
+            <h1 class="fw-bold mt-3 mb-0">Se spală azi?</h1>
         </div>
     </div>
 
-    <div class="card shadow-sm w-100 mb-4">
+    <div class="card shadow-sm w-100 mb-4" style="background-color: #f9f5ec;">
         <div class="card-body text-center">
             @if (Model.CanWash)
             {
                 <div class="alert alert-success fs-4 fw-bold">
-                    <i class="bi bi-check-circle-fill"></i> Astazi poti spala 🙆
+                    <i class="bi bi-check-circle-fill"></i> Azi poți spăla 🧺
                 </div>
             }
             else
             {
                 <div class="alert alert-danger fs-4 fw-bold">
-                    <i class="bi bi-x-circle-fill"></i> Astazi nu se spala 🙅
+                    <i class="bi bi-x-circle-fill"></i> Azi nu se spală 🙅
                 </div>
             }
             <p class="text-muted mt-3 mb-0">
-                Astazi este <strong>@DateTime.Now.ToString("MMMM dd")</strong>
+                @{
+                    var roCulture = new System.Globalization.CultureInfo("ro-RO");
+                    var localizedDate = DateTime.Now.ToString("d MMMM yyyy", roCulture);
+                }
+                🗓️ Data de astăzi este <strong>@localizedDate</strong>
             </p>
         </div>
     </div>
 
     @if (!Model.CanWash)
     {
-        <div class="card shadow-sm w-100 mb-4">
+        <div class="card shadow-sm w-100 mb-4" style="background-color: #f9f5ec;">
             <div class="card-body">
-                <h5 class="fw-bold mb-2">Sarbatori religioase astazi:</h5>
-                <ul>
-                    @foreach(var holiday in Model.Holidays) {
-                        <li><strong>@holiday.Name</strong></li>
+                @{
+                    var nonSimpleHolidays = Model.Holidays.Where(holiday => holiday.HolidayLevel !=
+                    HolidayLevel.SimpleEntry).ToList();
+                    var isSingular = nonSimpleHolidays.Count == 1;
                 }
+                <h3 class="fw-bold mb-2">
+                    @(isSingular ? "Sărbătoare religioasă astăzi:" : "Sărbatori religioase astăzi:")
+                </h3>
+                <ul>
+                    @foreach (var holiday in Model.Holidays)
+                    {
+                        @if (holiday.HolidayLevel == HolidayLevel.SimpleEntry)
+                        {
+                            continue;
+                        }
+                        // trick to make sure no cross emoji is displayed
+                        var holidayName = @holiday.Name.Replace("✝", "\u271D\uFE0E");
+                        <li class="text-danger">
+                            @(holiday.HolidayLevel == HolidayLevel.ExtraHoly ? $"<strong>{holidayName}</strong>" : holidayName)
+                            @Html.Raw("")
+                        </li>
+                    }
                 </ul>
-                <p class="text-muted small">
-                    Conform traditiei ortodoxe, in aceasta zi nu se spala hainele.
-                </p>
+                <div class="text-muted small">
+                    Conform tradiției ortodoxe, in această zi nu se spală hainele 😞
+                </div>
             </div>
         </div>
     }
