@@ -20,6 +20,7 @@ public class HomeController : Controller
         _scrapingService = scrapingService;
     }
 
+    //TODO: see if I can configure this to use the romanian format for dates
     public IActionResult Index([FromQuery] DateTime? date)
     {
         var searchedDate = date ?? DateTime.Now;
