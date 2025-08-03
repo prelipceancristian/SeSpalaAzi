@@ -9,18 +9,39 @@ namespace SeSpalaAzi3.Services
 
         public HolidayStatusModel GetHolidayStatus(DateTime date)
         {
-            var web = new HtmlWeb();
+            var htmlDocument = GetHtmlDocument(date);
+            var holidayContainer = GetDayContainerFromDocument(date, htmlDocument);
+            var result = BuildHolidayStatusModel(holidayContainer);
 
-            //TODO: can use async overload
-            var formattedDate = date.ToString("yyyyMM");
-            var fullUrl = $"{rootUrl}/{formattedDate}";
-            var doc = web.Load(fullUrl);
+            return result;
+        }
 
+        private static HolidayStatusModel BuildHolidayStatusModel(HtmlNode dayContainer)
+        {
+            var result = new HolidayStatusModel();
+            if ((dayContainer.Attributes["class"]?.Value.Split().Contains("rosu")) != true)
+            {
+                return result;
+            }
+
+            // there are holidays in this container
+            var holidays = dayContainer.ChildNodes.Select(node => new Holiday
+            {
+                Name = node.InnerText,
+                HolidayLevel = DetermineHolidayLevel(node)
+            });
+            result.Holidays = [.. holidays];
+
+            return result;
+        }
+
+        private static HtmlNode GetDayContainerFromDocument(DateTime date, HtmlDocument doc)
+        {
             // there is a single month view div in the page
             var monthNode = doc.DocumentNode.SelectNodes("//*[contains(@class, 'month-view')]")[0];
             // there is a wrapper div for each day 
             var dayNodes = monthNode.ChildNodes.Where(n => n.Name == "div").ToArray();
-            // selecting based on th given day
+            // selecting based on the given day
             var specificDayNode = dayNodes[date.Day - 1];
             // The day node is something like this:
             // <div>
@@ -28,30 +49,37 @@ namespace SeSpalaAzi3.Services
             // </div>
             // <div>
             //     <div class="calendar-zi rosu">
-            //         <a href="/..." class="rosub">...</a> 
-            //         <a href="/...">...</a>  
+            //         <a href="/...">...</a>  <!-- simple holiday -->
+            //         <a href="/..." class="rosub"> ✝) ... </a> <!-- holy day -->
+            //         <a href="/..." class="rosub"> (✝) ... </a> <!-- extra holy day -->
             //     </div>
             // </div>
-            var holidayContainer = specificDayNode.ChildNodes[1].ChildNodes[0];
+            var dayContainer = specificDayNode.ChildNodes[1].ChildNodes[0];
+            return dayContainer;
+        }
 
-            var result = new HolidayStatusModel();
-            if (holidayContainer.Attributes["class"]?.Value.Split().Contains("rosu") == true)
+        private static HolidayLevel DetermineHolidayLevel(HtmlNode holidayContainer)
+        {
+            var holidayLevel = HolidayLevel.SimpleEntry;
+            if (holidayContainer.Attributes["class"]?.Value.Split().Contains("rosub") == true)
             {
-                var holidays = new List<Holiday>();
-                foreach (var node in holidayContainer.ChildNodes)
+                holidayLevel = HolidayLevel.Holy;
+                if (holidayContainer.InnerHtml.Contains("(✝)"))
                 {
-                    var holiday = new Holiday
-                    {
-                        Name = node.InnerText,
-                        Date = date,
-                        HolidayLevel = HolidayLevel.Holy
-                    };
-                    holidays.Add(holiday);
+                    holidayLevel = HolidayLevel.ExtraHoly;
                 }
-                result.Holidays = [.. holidays];
             }
 
-            return result;
+            return holidayLevel;
+        }
+
+        private static HtmlDocument GetHtmlDocument(DateTime date)
+        {
+            var web = new HtmlWeb();
+            var formattedDate = date.ToString("yyyyMM");
+            var fullUrl = $"{rootUrl}/{formattedDate}";
+            var doc = web.Load(fullUrl);
+            return doc;
         }
     }
 }

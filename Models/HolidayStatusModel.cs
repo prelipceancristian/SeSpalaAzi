@@ -24,17 +24,13 @@ namespace SeSpalaAzi3.Models
         [JsonPropertyName("Name")]
         public required string Name { get; init; }
 
-        [JsonIgnore]
-        public DateTimeOffset Date { get; init; }
-
-        [JsonIgnore]
         public HolidayLevel HolidayLevel { get; init; }
     }
 
 
     public enum HolidayLevel
     {
-        Normal,
+        SimpleEntry,
         Holy,
         ExtraHoly
     }
