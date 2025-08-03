@@ -33,7 +33,7 @@ public class HomeController : Controller
         }
 
         var holidayStatusModel = _scrapingService.GetHolidayStatus(searchedDate);
-        _cache.StringSet(key, JsonSerializer.Serialize(holidayStatusModel));
+        _cache.StringSet(key, JsonSerializer.Serialize(holidayStatusModel), expiry: TimeSpan.FromHours(24));
 
         return View(holidayStatusModel);
     }
