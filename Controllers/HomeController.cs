@@ -24,6 +24,7 @@ public class HomeController : Controller
     public IActionResult Index([FromQuery] DateTime? date)
     {
         var searchedDate = date ?? DateTime.Now;
+        Console.WriteLine(searchedDate);
         var key = searchedDate.ToString("dd-MM-yyyy");
 
         var cacheContent = _cache.StringGet(key);

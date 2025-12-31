@@ -6,9 +6,9 @@ services:
       - "8080:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      # ASPNETCORE_URLS: http://+:80
       REDIS__HOST: redis
       REDIS__PORT: 6379
+      TZ: Europe/Bucharest
     depends_on:
       - redis
 
