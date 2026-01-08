@@ -57,8 +57,14 @@
                         // trick to make sure no cross emoji is displayed
                         var holidayName = @holiday.Name.Replace("✝", "\u271D\uFE0E");
                         <li class="text-danger">
-                            @(holiday.HolidayLevel == HolidayLevel.ExtraHoly ? $"<strong>{holidayName}</strong>" : holidayName)
-                            @Html.Raw("")
+                            @if (holiday.HolidayLevel == HolidayLevel.ExtraHoly)
+                            {
+                                @Html.Raw($"<strong>{holidayName}</strong>")
+                            }
+                            else
+                            {
+                                @holidayName
+                            }
                         </li>
                     }
                 </ul>

@@ -21,9 +21,10 @@ public class HomeController : Controller
     }
 
     //TODO: see if I can configure this to use the romanian format for dates
+    //TODO: if I do enable multiple dates, I should at least make it so that the model takes in the date and displays it correctly
     public IActionResult Index([FromQuery] DateTime? date)
     {
-        var searchedDate = date ?? DateTime.Now;
+var searchedDate = date ?? TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest"));
         Console.WriteLine(searchedDate);
         var key = searchedDate.ToString("dd-MM-yyyy");
 
